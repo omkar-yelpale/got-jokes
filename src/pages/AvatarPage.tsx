@@ -30,6 +30,7 @@ export default function AvatarPage() {
         id: Date.now().toString(),
         username: `User${selectedAvatar}`,
         avatarId: selectedAvatar,
+        customAvatar: undefined, // Don't set custom avatar here, only through upload
         level: 1,
         totalLaughs: 0,
         totalRoses: 0,
@@ -78,7 +79,11 @@ export default function AvatarPage() {
           
           {/* Make Your Own button */}
           <button
-            onClick={() => setSelectedAvatar(12)}
+            onClick={() => {
+              setSelectedAvatar(12);
+              // In a real implementation, this would open a file picker
+              // For now, it just selects avatar 12
+            }}
             className={`
               w-20 h-20 rounded-full flex items-center justify-center
               bg-gradient-to-br from-purple-500 to-pink-500

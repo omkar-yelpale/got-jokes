@@ -6,9 +6,9 @@ import { useApp } from '../hooks/useApp';
 import SimpleAudioPlayer from '../components/Audio/SimpleAudioPlayer';
 
 const AVATAR_EMOJIS: { [key: number]: string } = {
-  1: '👦', 2: '🧔', 3: '👩', 4: '👱‍♀️',
-  5: '🧔‍♂️', 6: '🤓', 7: '👨‍🦱', 8: '👩‍🦰',
-  9: '👨‍🦲', 10: '👨‍🦳', 11: '👩‍🦳',
+  1: '👦', 2: '👨', 3: '😎', 4: '👩',
+  5: '🧔', 6: '🤓', 7: '👩‍🦱', 8: '👱‍♀️',
+  9: '👨‍💼', 10: '👩‍💻', 11: '🧑‍🎤', 12: '🎭',
 };
 
 export default function ProfilePage() {
