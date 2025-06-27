@@ -73,17 +73,21 @@ export default function RecordPage() {
       setIsProcessing(true);
       dispatch({ type: "SET_RECORDING_STATE", payload: "processing" });
 
-      // Use real transcript or fallback to a default if empty
-      const jokeTranscript = finalTranscript || 
-        "So I went to the store yesterday, and you won't believe what happened. The cashier looked at me and said, 'Did you find everything?' And I said, 'Yeah, except for my dignity after trying to parallel park outside!'";
+      // Check if we have a real transcript
+      const hasRealTranscript = !!finalTranscript && finalTranscript.trim().length > 0;
+      const jokeTranscript = hasRealTranscript 
+        ? finalTranscript 
+        : "So I went to the store yesterday, and you won't believe what happened. The cashier looked at me and said, 'Did you find everything?' And I said, 'Yeah, except for my dignity after trying to parallel park outside!'";
       
       setTranscript(jokeTranscript);
       console.log('Final transcript:', jokeTranscript);
+      console.log('Has real transcript:', hasRealTranscript);
 
-      // Get AI feedback with real transcript
+      // Get AI feedback - only use real AI if we have a real transcript
       const response = await getMockClaudeResponse(
         jokeTranscript,
-        recordingTime
+        recordingTime,
+        hasRealTranscript // Pass this flag to determine if we should use AI
       );
       setClaudeResponse(response);
       setIsProcessing(false);
@@ -283,6 +287,11 @@ export default function RecordPage() {
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               <span>Analyzing your joke...</span>
             </div>
+            <p className="text-gray-400 text-sm mt-2">
+              {transcript === "So I went to the store yesterday, and you won't believe what happened. The cashier looked at me and said, 'Did you find everything?' And I said, 'Yeah, except for my dignity after trying to parallel park outside!'" 
+                ? "Using sample analysis (transcription unavailable)" 
+                : "Using AI analysis for your joke"}
+            </p>
           </div>
         )}
       </div>

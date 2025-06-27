@@ -52,6 +52,8 @@ If the AI integration fails or no API key is configured:
 - **claude-3-opus**: ~$0.015 per joke analysis
 - Monitor your Anthropic usage dashboard
 
+**Cost Saving**: The app only calls Claude AI when real transcription is available. If transcription fails or is unavailable, it uses mock responses to save API costs.
+
 ## Security Notes
 
 - API key is exposed in frontend (use restricted keys)

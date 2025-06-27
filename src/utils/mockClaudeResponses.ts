@@ -185,9 +185,18 @@ export function analyzeJoke(transcript: string, duration: number): ClaudeRespons
 // Get AI response with fallback to mock
 export async function getMockClaudeResponse(
   transcript: string, 
-  duration: number
+  duration: number,
+  useRealAI: boolean = false // Only use AI when we have real transcription
 ): Promise<ClaudeResponse> {
   try {
+    // Check if we should use real AI
+    if (!useRealAI) {
+      console.log('Using mock response (no real transcription)');
+      // Simulate network delay for consistency
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      return analyzeJoke(transcript, duration);
+    }
+
     // Check if API key is configured
     if (!import.meta.env.VITE_ANTHROPIC_API_KEY || import.meta.env.VITE_ANTHROPIC_API_KEY === 'your_anthropic_api_key_here') {
       console.warn('Claude API key not configured, using mock response');
@@ -196,7 +205,8 @@ export async function getMockClaudeResponse(
       return analyzeJoke(transcript, duration);
     }
 
-    // Try to get Claude AI response
+    // Try to get Claude AI response only with real transcription
+    console.log('Using Claude AI for real transcript analysis');
     const aiResponse = await analyzeJokeWithClaude(transcript, duration);
     return aiResponse;
   } catch (error) {
