@@ -4,6 +4,7 @@ import type { ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import SimpleAudioPlayer from '../components/Audio/SimpleAudioPlayer';
+import logo from '../assets/logo.png';
 
 const AVATAR_EMOJIS: { [key: number]: string } = {
   1: '👦', 2: '👨', 3: '😎', 4: '👩',
@@ -84,10 +85,8 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
       <div className="max-w-md mx-auto pb-20">
         {/* Header */}
-        <div className="flex justify-center items-center py-4 px-4">
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            got jokes? <span>😉</span>
-          </h1>
+        <div className="flex justify-center items-center py-6 px-4">
+          <img src={logo} alt="Got Jokes?" className="h-16 w-auto" />
         </div>
 
         {/* Profile Header */}
@@ -154,6 +153,8 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
                         <span>😂 {joke.reactions.laughs}</span>
                         <span>🌹 {joke.reactions.roses}</span>
+                        {joke.reactions.tomatoes > 0 && <span>🍅 {joke.reactions.tomatoes}</span>}
+                        {(joke.reactions.feedback?.includes('cricket') || joke.reactions.feedback?.includes('Cricket')) && <span>🦗</span>}
                         <span>{Math.floor(joke.duration)}s</span>
                       </div>
                     </div>
@@ -211,6 +212,10 @@ export default function ProfilePage() {
                         <p className="text-white font-medium">{joke.title}</p>
                         <div className="flex items-center gap-4 mt-2 text-sm text-gray-300">
                           <span className="text-yellow-400">Draft</span>
+                          <span>😂 {joke.reactions.laughs}</span>
+                          <span>🌹 {joke.reactions.roses}</span>
+                          {joke.reactions.tomatoes > 0 && <span>🍅 {joke.reactions.tomatoes}</span>}
+                          {(joke.reactions.feedback?.includes('cricket') || joke.reactions.feedback?.includes('Cricket')) && <span>🦗</span>}
                           <span>{Math.floor(joke.duration)}s</span>
                         </div>
                       </div>
@@ -259,20 +264,22 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
+      {/* Home Button - Top Left */}
+      <button
+        onClick={() => navigate('/')}
+        className="fixed top-4 left-4 p-3 text-[#EC4899] bg-[#0F172A]/90 backdrop-blur-lg rounded-full border border-gray-700 z-10"
+      >
+        <IconHome size={24} />
+      </button>
+
+      {/* Bottom Navigation - Only Mic Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0F172A]/90 backdrop-blur-lg border-t border-gray-700">
-        <div className="flex justify-around items-center py-2">
-          <button
-            onClick={() => navigate('/')}
-            className="p-3 text-[#EC4899]"
-          >
-            <IconHome size={28} />
-          </button>
+        <div className="flex justify-center items-center py-4">
           <button
             onClick={() => navigate('/record')}
-            className="p-3 text-gray-400 hover:text-white transition-colors"
+            className="p-4 bg-gradient-to-r from-[#5B21B6] to-[#EC4899] text-white rounded-full hover:opacity-90 transition-opacity shadow-lg"
           >
-            <IconMicrophone size={28} />
+            <IconMicrophone size={32} />
           </button>
         </div>
       </div>
