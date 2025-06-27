@@ -89,8 +89,8 @@ class SoundEffects {
   }
 
   // Play ambient crowd murmur (pleasant background sound)
-  playAmbientCrowd() {
-    if (!this.audioContext) return;
+  playAmbientCrowd(): (() => void) | null {
+    if (!this.audioContext) return null;
 
     // Create a low-frequency rumble for crowd ambience
     const bufferSize = this.audioContext.sampleRate * 3; // 3 seconds
