@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import type { User } from '../types/index';
 import logo from '../assets/logo.png';
+import buttonContinue from '../assets/button-continue.svg';
 
 // Avatar data for 3x4 grid
 const AVATARS = [
@@ -104,20 +105,21 @@ export default function AvatarPage() {
         </div>
       </div>
 
-      {/* Enter Button */}
+      {/* Continue Button */}
       <button
         onClick={handleEnter}
         disabled={!selectedAvatar}
-        className={`
-          px-16 py-4 rounded-full text-xl font-bold
-          transition-all duration-200 transform
-          ${selectedAvatar
-            ? 'bg-gradient-to-r from-[#5B21B6] to-purple-700 hover:from-purple-700 hover:to-purple-800 hover:scale-105'
-            : 'bg-gray-600 cursor-not-allowed opacity-50'
-          }
-        `}
+        className={`transition-transform ${
+          selectedAvatar 
+            ? 'hover:scale-105 active:scale-95' 
+            : 'opacity-50 cursor-not-allowed'
+        }`}
       >
-        Enter
+        <img 
+          src={buttonContinue} 
+          alt="Continue" 
+          className="w-48 md:w-64 h-auto"
+        />
       </button>
     </div>
   );
