@@ -86,9 +86,23 @@ export class TranscriptionService {
 
     // Handle errors
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error);
-      if (event.error === 'no-speech') {
-        console.log('No speech detected');
+      console.error('Speech recognition error:', event.error, event.message);
+      
+      switch (event.error) {
+        case 'no-speech':
+          console.log('No speech detected');
+          break;
+        case 'not-allowed':
+          console.error('Microphone permission denied');
+          break;
+        case 'network':
+          console.error('Network error during speech recognition');
+          break;
+        case 'service-not-allowed':
+          console.error('Speech recognition service not allowed (HTTPS required)');
+          break;
+        default:
+          console.error('Unknown speech recognition error');
       }
     };
 
@@ -144,7 +158,18 @@ export class TranscriptionService {
   }
 
   isAvailable(): boolean {
-    return !!SpeechRecognition;
+    // Check for Speech Recognition API
+    if (!SpeechRecognition) {
+      return false;
+    }
+    
+    // In production, also check for HTTPS (required for speech recognition)
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      console.warn('Speech recognition requires HTTPS in production');
+      return false;
+    }
+    
+    return true;
   }
 
   isActive(): boolean {

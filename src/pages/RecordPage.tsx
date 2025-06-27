@@ -287,11 +287,11 @@ export default function RecordPage() {
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               <span>Analyzing your joke...</span>
             </div>
-            <p className="text-gray-400 text-sm mt-2">
-              {transcript === "So I went to the store yesterday, and you won't believe what happened. The cashier looked at me and said, 'Did you find everything?' And I said, 'Yeah, except for my dignity after trying to parallel park outside!'" 
-                ? "Using sample analysis (transcription unavailable)" 
-                : "Using AI analysis for your joke"}
-            </p>
+            {!transcriptionAvailable && (
+              <p className="text-gray-400 text-sm mt-2">
+                Using sample analysis (voice transcription unavailable)
+              </p>
+            )}
           </div>
         )}
       </div>
