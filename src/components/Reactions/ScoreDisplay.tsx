@@ -25,10 +25,10 @@ export default function ScoreDisplay({ score, isVisible }: ScoreDisplayProps) {
 
   // Glow effect based on score
   const getScoreColor = (scoreValue: number) => {
-    if (scoreValue >= 80) return 'from-yellow-400 to-orange-400 shadow-yellow-400/50';
-    if (scoreValue >= 60) return 'from-pink-400 to-purple-400 shadow-pink-400/50';
-    if (scoreValue >= 40) return 'from-blue-400 to-purple-400 shadow-blue-400/50';
-    return 'from-red-400 to-orange-400 shadow-red-400/50';
+    if (scoreValue >= 80) return 'from-green-400 to-emerald-400 shadow-green-400/50'; // Great - green
+    if (scoreValue >= 60) return 'from-blue-400 to-cyan-400 shadow-blue-400/50'; // Good - blue
+    if (scoreValue >= 40) return 'from-yellow-400 to-orange-400 shadow-yellow-400/50'; // Mixed - yellow
+    return 'from-red-500 to-red-600 shadow-red-500/50'; // Poor - red
   };
 
   // Score label based on score

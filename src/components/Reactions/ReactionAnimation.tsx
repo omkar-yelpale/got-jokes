@@ -96,10 +96,10 @@ export default function ReactionAnimation({ reaction, isActive, onComplete }: Re
       <animated.div 
         style={flashAnimation}
         className={`absolute inset-0 ${
-          reaction === 'laughs' ? 'bg-yellow-400' :
+          reaction === 'laughs' ? 'bg-green-400' :
           reaction === 'roses' ? 'bg-pink-400' :
-          reaction === 'tomatoes' ? 'bg-red-500' :
-          'bg-gray-600'
+          reaction === 'tomatoes' ? 'bg-red-600' :
+          'bg-gray-700'
         }`}
       />
 
@@ -123,16 +123,16 @@ export default function ReactionAnimation({ reaction, isActive, onComplete }: Re
       {/* Reaction text */}
       {isActive && (
         <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2">
-          <div className={`text-4xl font-bold animate-bounce ${
-            reaction === 'laughs' ? 'text-yellow-400' :
-            reaction === 'roses' ? 'text-pink-400' :
-            reaction === 'tomatoes' ? 'text-red-500' :
-            'text-gray-400'
+          <div className={`text-4xl font-bold ${
+            reaction === 'laughs' ? 'text-yellow-400 animate-bounce' :
+            reaction === 'roses' ? 'text-pink-400 animate-bounce' :
+            reaction === 'tomatoes' ? 'text-red-600 animate-shake' :
+            'text-gray-500 animate-pulse'
           }`}>
-            {reaction === 'laughs' && 'HILARIOUS!'}
-            {reaction === 'roses' && 'NICE ONE!'}
-            {reaction === 'tomatoes' && 'BOO!'}
-            {reaction === 'crickets' && '...crickets...'}
+            {reaction === 'laughs' && '🎉 HILARIOUS! 🎉'}
+            {reaction === 'roses' && '👏 NICE ONE! 👏'}
+            {reaction === 'tomatoes' && '👎 BOO! 👎'}
+            {reaction === 'crickets' && '😐 ...crickets... 😐'}
           </div>
         </div>
       )}

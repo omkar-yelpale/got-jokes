@@ -1,4 +1,4 @@
-import { IconHome, IconMenu2, IconMicrophone, IconUser, IconLogout, IconUserCircle } from '@tabler/icons-react';
+import { IconHome, IconMenu2, IconMicrophone, IconLogout, IconUserCircle, IconTrash, IconDotsVertical } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
@@ -15,12 +15,26 @@ export default function ProfilePage() {
   const { state, dispatch } = useApp();
   const { user, jokes } = state;
   const [showMenu, setShowMenu] = useState(false);
+  const [activeJokeMenu, setActiveJokeMenu] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveJokeMenu(null);
+      setShowMenu(false);
+    };
+
+    if (activeJokeMenu || showMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [activeJokeMenu, showMenu]);
 
   if (!user) {
     return null;
@@ -100,15 +114,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-bold text-white">{user.followers}</p>
-              <p className="text-gray-300 text-sm">Followers</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">{user.following}</p>
-              <p className="text-gray-300 text-sm">Following</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-white">{user.totalLaughs}</p>
               <p className="text-gray-300 text-sm">Laughs</p>
@@ -122,12 +128,7 @@ export default function ProfilePage() {
 
         {/* My Jokes Section */}
         <div className="px-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-white text-lg font-semibold">My Jokes</h3>
-            <button className="px-4 py-2 border border-[#EC4899] text-[#EC4899] rounded-full text-sm hover:bg-[#EC4899]/10 transition-colors">
-              Create Set
-            </button>
-          </div>
+          <h3 className="text-white text-lg font-semibold mb-4">My Jokes</h3>
 
           {publishedJokes.length === 0 ? (
             <div className="bg-white/5 rounded-xl p-8 text-center">
@@ -142,7 +143,7 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-4">
               {publishedJokes.map((joke) => (
-                <div key={joke.id} className="bg-white/5 rounded-xl p-4">
+                <div key={joke.id} className="bg-white/5 rounded-xl p-4 relative">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="text-white font-medium">{joke.title}</p>
@@ -152,10 +153,42 @@ export default function ProfilePage() {
                         <span>{Math.floor(joke.duration)}s</span>
                       </div>
                     </div>
-                    {/* Play/Pause Button */}
-                    {joke.audioBlob && (
-                      <SimpleAudioPlayer audioUrl={joke.audioBlob} />
-                    )}
+                    <div className="flex items-center gap-2">
+                      {/* Play/Pause Button */}
+                      {joke.audioBlob && (
+                        <SimpleAudioPlayer audioUrl={joke.audioBlob} />
+                      )}
+                      {/* Menu Button */}
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveJokeMenu(activeJokeMenu === joke.id ? null : joke.id);
+                          }}
+                          className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                          <IconDotsVertical size={20} />
+                        </button>
+                        
+                        {/* Dropdown Menu */}
+                        {activeJokeMenu === joke.id && (
+                          <div className="absolute right-0 mt-2 w-40 bg-[#1E293B] rounded-lg shadow-xl border border-gray-700 z-20">
+                            <button
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this joke?')) {
+                                  dispatch({ type: 'DELETE_JOKE', payload: joke.id });
+                                  setActiveJokeMenu(null);
+                                }
+                              }}
+                              className="w-full flex items-center gap-2 px-4 py-3 text-red-400 hover:bg-white/10 transition-colors rounded-lg"
+                            >
+                              <IconTrash size={18} />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -168,7 +201,7 @@ export default function ProfilePage() {
               <h3 className="text-white text-lg font-semibold mb-4">Drafts</h3>
               <div className="space-y-4">
                 {draftJokes.map((joke) => (
-                  <div key={joke.id} className="bg-white/5 rounded-xl p-4 border border-gray-700">
+                  <div key={joke.id} className="bg-white/5 rounded-xl p-4 border border-gray-700 relative">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <p className="text-white font-medium">{joke.title}</p>
@@ -177,10 +210,42 @@ export default function ProfilePage() {
                           <span>{Math.floor(joke.duration)}s</span>
                         </div>
                       </div>
-                      {/* Play/Pause Button */}
-                      {joke.audioBlob && (
-                        <SimpleAudioPlayer audioUrl={joke.audioBlob} />
-                      )}
+                      <div className="flex items-center gap-2">
+                        {/* Play/Pause Button */}
+                        {joke.audioBlob && (
+                          <SimpleAudioPlayer audioUrl={joke.audioBlob} />
+                        )}
+                        {/* Menu Button */}
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveJokeMenu(activeJokeMenu === joke.id ? null : joke.id);
+                            }}
+                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                          >
+                            <IconDotsVertical size={20} />
+                          </button>
+                          
+                          {/* Dropdown Menu */}
+                          {activeJokeMenu === joke.id && (
+                            <div className="absolute right-0 mt-2 w-40 bg-[#1E293B] rounded-lg shadow-xl border border-gray-700 z-20">
+                              <button
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to delete this draft?')) {
+                                    dispatch({ type: 'DELETE_JOKE', payload: joke.id });
+                                    setActiveJokeMenu(null);
+                                  }
+                                }}
+                                className="w-full flex items-center gap-2 px-4 py-3 text-red-400 hover:bg-white/10 transition-colors rounded-lg"
+                              >
+                                <IconTrash size={18} />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -194,8 +259,8 @@ export default function ProfilePage() {
       <div className="fixed bottom-0 left-0 right-0 bg-[#0F172A]/90 backdrop-blur-lg border-t border-gray-700">
         <div className="flex justify-around items-center py-2">
           <button
-            onClick={() => navigate('/feed')}
-            className="p-3 text-gray-400 hover:text-white transition-colors"
+            onClick={() => navigate('/')}
+            className="p-3 text-[#EC4899]"
           >
             <IconHome size={28} />
           </button>
@@ -204,12 +269,6 @@ export default function ProfilePage() {
             className="p-3 text-gray-400 hover:text-white transition-colors"
           >
             <IconMicrophone size={28} />
-          </button>
-          <button
-            onClick={() => navigate('/profile')}
-            className="p-3 text-[#EC4899]"
-          >
-            <IconUser size={28} />
           </button>
         </div>
       </div>

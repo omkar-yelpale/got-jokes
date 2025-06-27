@@ -39,7 +39,7 @@ export default function AvatarPage() {
       };
       
       dispatch({ type: 'SET_USER', payload: newUser });
-      navigate('/feed');
+      navigate('/');
     }
   };
 

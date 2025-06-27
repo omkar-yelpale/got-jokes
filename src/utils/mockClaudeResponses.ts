@@ -1,5 +1,15 @@
 import type { ClaudeResponse, JokeMetrics } from '../types';
 
+// Convert blob to base64 for storage
+export const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 // Generate metrics based on score range
 const generateMetrics = (baseScore: number): JokeMetrics => {
   const variance = () => Math.random() * 10 - 5; // ±5 variance
@@ -12,9 +22,9 @@ const generateMetrics = (baseScore: number): JokeMetrics => {
   };
 };
 
-// Keywords for analyzing joke content
-const positiveKeywords = ['funny', 'hilarious', 'laugh', 'joke', 'comedy', 'clever', 'witty'];
-const negativeKeywords = ['bad', 'awful', 'terrible', 'unfunny', 'boring', 'lame'];
+// Keywords for analyzing joke content (could be used for more sophisticated analysis)
+// const positiveKeywords = ['funny', 'hilarious', 'laugh', 'joke', 'comedy', 'clever', 'witty'];
+// const negativeKeywords = ['bad', 'awful', 'terrible', 'unfunny', 'boring', 'lame'];
 
 // Various feedback messages based on performance
 const greatFeedback = [
@@ -63,14 +73,19 @@ const suggestions = [
 export function analyzeJoke(transcript: string, duration: number): ClaudeResponse {
   const lowerTranscript = transcript.toLowerCase();
   
-  // Check for keywords
-  const hasPositive = positiveKeywords.some(keyword => lowerTranscript.includes(keyword));
-  const hasNegative = negativeKeywords.some(keyword => lowerTranscript.includes(keyword));
-  
-  // Analyze joke length (too short or too long affects score)
+  // Analyze various aspects of the joke
   const wordCount = transcript.split(/\s+/).length;
+  const hasSetup = transcript.includes('?') || transcript.includes(',');
+  const hasPunchline = wordCount > 10;
   const optimalWordCount = duration * 2.5; // ~2.5 words per second is good pacing
   const pacingScore = Math.max(0, 100 - Math.abs(wordCount - optimalWordCount) * 2);
+  
+  // Check for offensive content
+  const offensiveKeywords = ['hate', 'stupid', 'dumb', 'idiot', 'kill', 'die'];
+  const isOffensive = offensiveKeywords.some(keyword => lowerTranscript.includes(keyword));
+  
+  // Random factor to make it more realistic
+  const randomFactor = Math.random();
   
   // Determine reaction and score
   let reaction: ClaudeResponse['reaction'];
@@ -78,34 +93,77 @@ export function analyzeJoke(transcript: string, duration: number): ClaudeRespons
   let feedback: string;
   let suggestion: string | undefined;
   
-  if (hasPositive && !hasNegative) {
-    // Great performance
-    reaction = 'laughs';
-    score = 80 + Math.random() * 20; // 80-100
-    feedback = greatFeedback[Math.floor(Math.random() * greatFeedback.length)];
-  } else if (hasNegative && !hasPositive) {
-    // Poor performance
+  if (isOffensive) {
+    // Offensive joke - always gets booed
     reaction = 'tomatoes';
-    score = 10 + Math.random() * 20; // 10-30
-    feedback = poorFeedback[Math.floor(Math.random() * poorFeedback.length)];
-    suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
-  } else if (transcript.length < 20) {
-    // Too short
+    score = 5 + Math.random() * 10; // 5-15
+    feedback = "Whoa! That crossed a line. The audience is not happy!";
+    suggestion = "Keep it clean and respectful. Comedy doesn't need to hurt!";
+  } else if (wordCount < 10) {
+    // Too short - crickets
     reaction = 'crickets';
-    score = 20 + Math.random() * 20; // 20-40
-    feedback = "That was too short! Give us more to work with!";
-    suggestion = "Try expanding your joke with more setup and detail!";
-  } else if (pacingScore > 70) {
-    // Good pacing
-    reaction = 'roses';
-    score = 60 + Math.random() * 20; // 60-80
-    feedback = goodFeedback[Math.floor(Math.random() * goodFeedback.length)];
+    score = 15 + Math.random() * 15; // 15-30
+    feedback = "That was... it? The audience is confused!";
+    suggestion = "Add more setup and context to your joke!";
+  } else if (!hasSetup || !hasPunchline) {
+    // Poor structure - give them a chance
+    if (randomFactor < 0.3) { // 30% chance of still getting roses
+      reaction = 'roses';
+      score = 45 + Math.random() * 15; // 45-60
+      feedback = "Not bad! The crowd appreciated the effort!";
+      suggestion = "Add more structure to really nail it next time!";
+    } else if (randomFactor < 0.6) { // 30% chance of crickets
+      reaction = 'crickets';
+      score = 20 + Math.random() * 20; // 20-40
+      feedback = "The audience is waiting for the punchline...";
+      suggestion = "Every joke needs a clear setup and punchline!";
+    } else { // 40% chance of tomatoes
+      reaction = 'tomatoes';
+      score = 15 + Math.random() * 15; // 15-30
+      feedback = poorFeedback[Math.floor(Math.random() * poorFeedback.length)];
+      suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    }
+  } else if (pacingScore < 50) {
+    // Bad pacing - give them more chances
+    if (randomFactor < 0.35) { // 35% chance of roses
+      reaction = 'roses';
+      score = 50 + Math.random() * 15; // 50-65
+      feedback = "The crowd is warming up to you! Keep going!";
+      suggestion = "Work on your timing to really make them laugh!";
+    } else if (randomFactor < 0.65) { // 30% chance of tomatoes
+      reaction = 'tomatoes';
+      score = 25 + Math.random() * 20; // 25-45
+      feedback = "The timing was way off! Work on your delivery!";
+      suggestion = "Practice your pacing - timing is everything!";
+    } else { // 35% chance of crickets
+      reaction = 'crickets';
+      score = 30 + Math.random() * 20; // 30-50
+      feedback = "Some chuckles, but mostly silence...";
+      suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    }
   } else {
-    // Mixed performance
-    reaction = 'roses';
-    score = 40 + Math.random() * 20; // 40-60
-    feedback = mixedFeedback[Math.floor(Math.random() * mixedFeedback.length)];
-    suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    // Decent joke - now it's more random
+    const reactionRoll = Math.random();
+    
+    if (reactionRoll < 0.40) { // 40% chance of great reaction
+      reaction = 'laughs';
+      score = 75 + Math.random() * 25; // 75-100
+      feedback = greatFeedback[Math.floor(Math.random() * greatFeedback.length)];
+    } else if (reactionRoll < 0.70) { // 30% chance of good reaction
+      reaction = 'roses';
+      score = 55 + Math.random() * 20; // 55-75
+      feedback = goodFeedback[Math.floor(Math.random() * goodFeedback.length)];
+    } else if (reactionRoll < 0.85) { // 15% chance of mixed reaction
+      reaction = 'roses';
+      score = 40 + Math.random() * 15; // 40-55
+      feedback = mixedFeedback[Math.floor(Math.random() * mixedFeedback.length)];
+      suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    } else { // 15% chance of negative reaction
+      reaction = Math.random() < 0.5 ? 'tomatoes' : 'crickets';
+      score = 25 + Math.random() * 15; // 25-40
+      feedback = poorFeedback[Math.floor(Math.random() * poorFeedback.length)];
+      suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    }
   }
   
   // Round score

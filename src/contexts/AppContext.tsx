@@ -6,6 +6,7 @@ type Action =
   | { type: 'SET_CURRENT_JOKE'; payload: Joke | null }
   | { type: 'ADD_JOKE'; payload: Joke }
   | { type: 'UPDATE_JOKE'; payload: { id: string; joke: Partial<Joke> } }
+  | { type: 'DELETE_JOKE'; payload: string }
   | { type: 'SET_RECORDING'; payload: boolean }
   | { type: 'SET_RECORDING_STATE'; payload: AppState['recordingState'] }
   | { type: 'LOAD_JOKES'; payload: Joke[] };
@@ -41,6 +42,11 @@ function appReducer(state: AppState, action: Action): AppState {
             ? { ...joke, ...action.payload.joke }
             : joke
         )
+      };
+    case 'DELETE_JOKE':
+      return {
+        ...state,
+        jokes: state.jokes.filter(joke => joke.id !== action.payload)
       };
     case 'SET_RECORDING':
       return { ...state, isRecording: action.payload };

@@ -101,10 +101,26 @@ export default function AnalyticsModal({
             </button>
           </div>
 
-          {/* Overall Score */}
+          {/* Overall Score with Reaction Badge */}
           <div className="text-center mb-6">
             <div className="text-5xl font-bold text-white mb-2">{response.score}</div>
-            <div className="text-gray-300">Overall Score</div>
+            <div className="text-gray-300 mb-3">Overall Score</div>
+            
+            {/* Reaction Badge */}
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+              response.reaction === 'laughs' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+              response.reaction === 'roses' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+              response.reaction === 'tomatoes' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+              'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+            }`}>
+              <span className="text-lg">
+                {response.reaction === 'laughs' && '😂'}
+                {response.reaction === 'roses' && '🌹'}
+                {response.reaction === 'tomatoes' && '🍅'}
+                {response.reaction === 'crickets' && '🦗'}
+              </span>
+              <span className="capitalize">{response.reaction}</span>
+            </div>
           </div>
 
           {/* Metrics */}

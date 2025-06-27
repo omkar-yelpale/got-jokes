@@ -6,11 +6,11 @@ import CrowdText from "../components/Reactions/CrowdText";
 import ReactionAnimation from "../components/Reactions/ReactionAnimation";
 import ScoreDisplay from "../components/Reactions/ScoreDisplay";
 import RecordButton from "../components/Recording/RecordButton";
-import RecordingStage from "../components/Recording/RecordingStage";
 import { useApp } from "../hooks/useApp";
 import { useAudioRecording } from "../hooks/useAudioRecording";
 import type { ClaudeResponse, Joke } from "../types";
-import { getMockClaudeResponse } from "../utils/mockClaudeResponses";
+import { getMockClaudeResponse, blobToBase64 } from "../utils/mockClaudeResponses";
+import { soundEffects } from "../utils/soundEffects";
 
 export default function RecordPage() {
   const navigate = useNavigate();
@@ -44,6 +44,24 @@ export default function RecordPage() {
     });
   }, [isRecording, dispatch]);
 
+  // Play ambient crowd sound on mount
+  useEffect(() => {
+    let stopFunction: (() => void) | null = null;
+    
+    // Start ambient sound after a short delay (to ensure user interaction)
+    const timer = setTimeout(() => {
+      stopFunction = soundEffects.playAmbientCrowd();
+    }, 500);
+
+    // Cleanup
+    return () => {
+      clearTimeout(timer);
+      if (stopFunction) {
+        stopFunction();
+      }
+    };
+  }, []);
+
   const handleToggleRecording = async () => {
     if (isRecording) {
       stopRecording();
@@ -70,6 +88,9 @@ export default function RecordPage() {
       }
 
       setShowReaction(true);
+      // Play the reaction sound effect
+      soundEffects.playReactionSound(response.reaction);
+      
       setTimeout(() => {
         setShowScore(true);
         setTimeout(() => {
@@ -99,11 +120,14 @@ export default function RecordPage() {
   const handleSave = async () => {
     if (!audioBlob || !claudeResponse) return;
 
+    // Convert blob to base64 for persistence
+    const audioBase64 = await blobToBase64(audioBlob);
+
     const joke: Joke = {
       id: Date.now().toString(),
       userId: state.user?.id || "",
       title: `Joke from ${new Date().toLocaleDateString()}`,
-      audioBlob: audioUrl || "",
+      audioBlob: audioBase64,
       transcript,
       duration: recordingTime,
       createdAt: new Date(),
@@ -119,17 +143,20 @@ export default function RecordPage() {
     };
 
     dispatch({ type: "ADD_JOKE", payload: joke });
-    navigate("/profile");
+    navigate("/");
   };
 
   const handlePublish = async () => {
     if (!audioBlob || !claudeResponse) return;
 
+    // Convert blob to base64 for persistence
+    const audioBase64 = await blobToBase64(audioBlob);
+
     const joke: Joke = {
       id: Date.now().toString(),
       userId: state.user?.id || "",
       title: `Joke from ${new Date().toLocaleDateString()}`,
-      audioBlob: audioUrl || "",
+      audioBlob: audioBase64,
       transcript,
       duration: recordingTime,
       createdAt: new Date(),
@@ -145,7 +172,7 @@ export default function RecordPage() {
     };
 
     dispatch({ type: "ADD_JOKE", payload: joke });
-    navigate("/feed");
+    navigate("/");
   };
 
   const handleDiscard = () => {
@@ -157,7 +184,16 @@ export default function RecordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F172A] to-[#1E293B] relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Stage Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(/src/assets/image.png)` }}
+      />
+      
+      {/* Dark overlay for better text visibility */}
+      <div className="absolute inset-0 bg-black/30" />
+
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -166,25 +202,11 @@ export default function RecordPage() {
         <IconArrowLeft size={24} />
       </button>
 
-      {/* Stage Background */}
-      <div className="absolute inset-0">
-        {/* Stars */}
-        <div className="absolute top-10 left-10 w-2 h-2 bg-white rounded-full animate-pulse" />
-        <div className="absolute top-20 right-20 w-1 h-1 bg-white rounded-full animate-pulse delay-75" />
-        <div className="absolute top-32 left-1/3 w-2 h-2 bg-white rounded-full animate-pulse delay-150" />
-        <div className="absolute bottom-20 right-1/4 w-1 h-1 bg-white rounded-full animate-pulse delay-300" />
-
-        {/* Moon */}
-        <div className="absolute top-10 right-10 w-16 h-16 bg-yellow-200 rounded-full opacity-80" />
-      </div>
-
       <div className="max-w-md mx-auto min-h-screen flex flex-col items-center justify-center relative z-10 py-20">
-        {/* Stage with animated curtains */}
-        <RecordingStage isRecording={isRecording}>
-          <div className="text-6xl animate-bounce">
-            {isRecording ? "🎭" : "🎤"}
-          </div>
-        </RecordingStage>
+        {/* Microphone icon */}
+        <div className="mb-8 text-6xl animate-bounce">
+          {isRecording ? "🎭" : "🎤"}
+        </div>
 
         {/* Recording Status */}
         <div className="mt-8 text-center">
