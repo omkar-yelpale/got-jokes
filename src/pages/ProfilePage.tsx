@@ -1,5 +1,6 @@
-import { IconHome, IconMenu2, IconMicrophone, IconLogout, IconUserCircle, IconTrash, IconDotsVertical } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { IconHome, IconMenu2, IconMicrophone, IconLogout, IconUserCircle, IconTrash, IconDotsVertical, IconCamera, IconX } from '@tabler/icons-react';
+import { useEffect, useState, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../hooks/useApp';
 import SimpleAudioPlayer from '../components/Audio/SimpleAudioPlayer';
@@ -16,6 +17,8 @@ export default function ProfilePage() {
   const { user, jokes } = state;
   const [showMenu, setShowMenu] = useState(false);
   const [activeJokeMenu, setActiveJokeMenu] = useState<string | null>(null);
+  const [showAvatarUpload, setShowAvatarUpload] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) {
@@ -35,6 +38,38 @@ export default function ProfilePage() {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [activeJokeMenu, showMenu]);
+
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please select a JPG, PNG, or WebP image');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Please select an image smaller than 5MB');
+      return;
+    }
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      dispatch({ type: 'UPDATE_USER_AVATAR', payload: result });
+      setShowAvatarUpload(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    dispatch({ type: 'UPDATE_USER_AVATAR', payload: null });
+    setShowAvatarUpload(false);
+  };
 
   if (!user) {
     return null;
@@ -105,8 +140,24 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="mx-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-20 h-20 bg-gradient-to-r from-[#5B21B6] to-[#EC4899] rounded-full flex items-center justify-center text-4xl">
-              {AVATAR_EMOJIS[user.avatarId]}
+            <div className="relative">
+              <div className="w-20 h-20 bg-gradient-to-r from-[#5B21B6] to-[#EC4899] rounded-full flex items-center justify-center text-4xl overflow-hidden">
+                {user.customAvatar ? (
+                  <img 
+                    src={user.customAvatar} 
+                    alt="Custom avatar" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  AVATAR_EMOJIS[user.avatarId]
+                )}
+              </div>
+              <button
+                onClick={() => setShowAvatarUpload(true)}
+                className="absolute -bottom-1 -right-1 p-1.5 bg-[#EC4899] rounded-full text-white hover:bg-[#DB2777] transition-colors"
+              >
+                <IconCamera size={16} />
+              </button>
             </div>
             <div className="flex-1">
               <h2 className="text-white text-xl font-semibold">@{user.username}</h2>
@@ -272,6 +323,76 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {/* Avatar Upload Modal */}
+      {showAvatarUpload && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/70 z-40"
+            onClick={() => setShowAvatarUpload(false)}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1E293B] rounded-2xl p-6 max-w-sm w-full">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-white text-xl font-semibold">Upload Avatar</h3>
+                <button
+                  onClick={() => setShowAvatarUpload(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <IconX size={24} />
+                </button>
+              </div>
+
+              {/* Current Avatar Preview */}
+              <div className="mb-6 text-center">
+                <div className="w-32 h-32 mx-auto bg-gradient-to-r from-[#5B21B6] to-[#EC4899] rounded-full flex items-center justify-center text-6xl overflow-hidden mb-2">
+                  {user.customAvatar ? (
+                    <img 
+                      src={user.customAvatar} 
+                      alt="Current avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    AVATAR_EMOJIS[user.avatarId]
+                  )}
+                </div>
+                <p className="text-gray-400 text-sm">Current Avatar</p>
+              </div>
+
+              {/* Upload Options */}
+              <div className="space-y-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-3 bg-gradient-to-r from-[#5B21B6] to-[#EC4899] text-white rounded-full font-medium hover:opacity-90 transition-opacity"
+                >
+                  Choose Image
+                </button>
+
+                {user.customAvatar && (
+                  <button
+                    onClick={handleRemoveAvatar}
+                    className="w-full py-3 border border-red-500 text-red-400 rounded-full font-medium hover:bg-red-500/10 transition-colors"
+                  >
+                    Remove Custom Avatar
+                  </button>
+                )}
+
+                <p className="text-gray-400 text-xs text-center">
+                  Upload JPG, PNG, or WebP (max 5MB)
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -203,9 +203,21 @@ export default function RecordPage() {
       </button>
 
       <div className="max-w-md mx-auto min-h-screen flex flex-col items-center justify-center relative z-10 py-20">
-        {/* Microphone icon */}
-        <div className="mb-8 text-6xl animate-bounce">
-          {isRecording ? "🎭" : "🎤"}
+        {/* Avatar or Microphone icon */}
+        <div className="mb-8 animate-bounce">
+          {isRecording && state.user?.customAvatar ? (
+            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20">
+              <img 
+                src={state.user.customAvatar} 
+                alt="Your avatar" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="text-6xl">
+              {isRecording ? "🎭" : "🎤"}
+            </div>
+          )}
         </div>
 
         {/* Recording Status */}

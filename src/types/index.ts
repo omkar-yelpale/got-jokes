@@ -2,6 +2,7 @@ export interface User {
   id: string;
   username: string;
   avatarId: number;
+  customAvatar?: string; // Base64 image data
   level: number;
   totalLaughs: number;
   totalRoses: number;

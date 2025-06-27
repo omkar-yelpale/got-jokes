@@ -3,6 +3,7 @@ import type { AppState, User, Joke } from '../types/index';
 
 type Action =
   | { type: 'SET_USER'; payload: User | null }
+  | { type: 'UPDATE_USER_AVATAR'; payload: string | null }
   | { type: 'SET_CURRENT_JOKE'; payload: Joke | null }
   | { type: 'ADD_JOKE'; payload: Joke }
   | { type: 'UPDATE_JOKE'; payload: { id: string; joke: Partial<Joke> } }
@@ -30,6 +31,15 @@ function appReducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_USER':
       return { ...state, user: action.payload };
+    case 'UPDATE_USER_AVATAR':
+      if (!state.user) return state;
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          customAvatar: action.payload || undefined
+        }
+      };
     case 'SET_CURRENT_JOKE':
       return { ...state, currentJoke: action.payload };
     case 'ADD_JOKE':
