@@ -1,4 +1,4 @@
-import { IconHome, IconMenu2, IconMicrophone, IconLogout, IconUserCircle, IconTrash, IconDotsVertical, IconCamera, IconX } from '@tabler/icons-react';
+import { IconHome, IconMicrophone, IconTrash, IconDotsVertical, IconCamera, IconX } from '@tabler/icons-react';
 import { useEffect, useState, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,6 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { state, dispatch } = useApp();
   const { user, jokes } = state;
-  const [showMenu, setShowMenu] = useState(false);
   const [activeJokeMenu, setActiveJokeMenu] = useState<string | null>(null);
   const [showAvatarUpload, setShowAvatarUpload] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,14 +29,13 @@ export default function ProfilePage() {
   useEffect(() => {
     const handleClickOutside = () => {
       setActiveJokeMenu(null);
-      setShowMenu(false);
     };
 
-    if (activeJokeMenu || showMenu) {
+    if (activeJokeMenu) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [activeJokeMenu, showMenu]);
+  }, [activeJokeMenu]);
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -77,64 +75,19 @@ export default function ProfilePage() {
 
   const publishedJokes = jokes.filter(joke => joke.published);
   const draftJokes = jokes.filter(joke => !joke.published);
+  
+  // Calculate total laughs and roses from published jokes
+  const totalLaughs = publishedJokes.reduce((sum, joke) => sum + joke.reactions.laughs, 0);
+  const totalRoses = publishedJokes.reduce((sum, joke) => sum + joke.reactions.roses, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
       <div className="max-w-md mx-auto pb-20">
         {/* Header */}
-        <div className="flex justify-between items-center py-4 px-4 relative">
+        <div className="flex justify-center items-center py-4 px-4">
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             got jokes? <span>😉</span>
           </h1>
-          <div className="relative">
-            <button 
-              onClick={() => setShowMenu(!showMenu)}
-              className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <IconMenu2 size={24} />
-            </button>
-            
-            {/* Dropdown Menu */}
-            {showMenu && (
-              <>
-                {/* Backdrop */}
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setShowMenu(false)}
-                />
-                
-                {/* Menu */}
-                <div className="absolute right-0 mt-2 w-48 bg-[#1E293B] rounded-lg shadow-xl border border-gray-700 z-20">
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      dispatch({ type: 'SET_USER', payload: null });
-                      navigate('/');
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors rounded-t-lg"
-                  >
-                    <IconUserCircle size={20} />
-                    <span>Change Avatar</span>
-                  </button>
-                  <div className="border-t border-gray-700" />
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      if (confirm('Are you sure you want to logout?')) {
-                        dispatch({ type: 'SET_USER', payload: null });
-                        localStorage.clear();
-                        navigate('/');
-                      }
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-white/10 transition-colors rounded-b-lg"
-                  >
-                    <IconLogout size={20} />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
         </div>
 
         {/* Profile Header */}
@@ -167,11 +120,11 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold text-white">{user.totalLaughs}</p>
+              <p className="text-2xl font-bold text-white">{totalLaughs}</p>
               <p className="text-gray-300 text-sm">Laughs</p>
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{user.totalRoses}</p>
+              <p className="text-2xl font-bold text-white">{totalRoses}</p>
               <p className="text-gray-300 text-sm">Roses</p>
             </div>
           </div>

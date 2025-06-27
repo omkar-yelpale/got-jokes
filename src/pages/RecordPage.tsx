@@ -11,6 +11,7 @@ import { useAudioRecording } from "../hooks/useAudioRecording";
 import type { ClaudeResponse, Joke } from "../types";
 import { getMockClaudeResponse, blobToBase64 } from "../utils/mockClaudeResponses";
 import { soundEffects } from "../utils/soundEffects";
+import stageBackground from "../assets/image.png";
 
 export default function RecordPage() {
   const navigate = useNavigate();
@@ -188,7 +189,7 @@ export default function RecordPage() {
       {/* Stage Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(/src/assets/image.png)` }}
+        style={{ backgroundImage: `url(${stageBackground})` }}
       />
       
       {/* Dark overlay for better text visibility */}
