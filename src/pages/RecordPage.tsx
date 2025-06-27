@@ -11,6 +11,7 @@ import { useAudioRecording } from "../hooks/useAudioRecording";
 import type { ClaudeResponse, Joke } from "../types";
 import { getMockClaudeResponse, blobToBase64 } from "../utils/mockClaudeResponses";
 import { soundEffects } from "../utils/soundEffects";
+import { transcriptionService } from "../utils/speechRecognition";
 import stageBackground from "../assets/image.png";
 
 export default function RecordPage() {
@@ -24,6 +25,7 @@ export default function RecordPage() {
   const [showReaction, setShowReaction] = useState(false);
   const [showScore, setShowScore] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [transcriptionAvailable] = useState(transcriptionService.isAvailable());
 
   const {
     isRecording,
@@ -65,18 +67,22 @@ export default function RecordPage() {
 
   const handleToggleRecording = async () => {
     if (isRecording) {
+      // Stop recording and transcription
       stopRecording();
+      const finalTranscript = transcriptionService.stop();
       setIsProcessing(true);
       dispatch({ type: "SET_RECORDING_STATE", payload: "processing" });
 
-      // Mock transcription
-      const mockTranscript =
+      // Use real transcript or fallback to a default if empty
+      const jokeTranscript = finalTranscript || 
         "So I went to the store yesterday, and you won't believe what happened. The cashier looked at me and said, 'Did you find everything?' And I said, 'Yeah, except for my dignity after trying to parallel park outside!'";
-      setTranscript(mockTranscript);
+      
+      setTranscript(jokeTranscript);
+      console.log('Final transcript:', jokeTranscript);
 
-      // Get AI feedback
+      // Get AI feedback with real transcript
       const response = await getMockClaudeResponse(
-        mockTranscript,
+        jokeTranscript,
         recordingTime
       );
       setClaudeResponse(response);
@@ -108,7 +114,23 @@ export default function RecordPage() {
       setShowReaction(false);
       setShowScore(false);
       setShowAnalytics(false);
-      await startRecording();
+      
+      // Start recording audio
+      try {
+        await startRecording();
+        
+        // Start transcription after recording starts successfully
+        const transcriptionStarted = transcriptionService.start((interim) => {
+          // Optional: Show live transcription
+          console.log('Interim transcript:', interim);
+        });
+        
+        if (!transcriptionStarted) {
+          console.warn('Transcription not available, will use fallback');
+        }
+      } catch (err) {
+        console.error('Failed to start recording:', err);
+      }
     }
   };
 
@@ -229,6 +251,11 @@ export default function RecordPage() {
           {isRecording && (
             <p className="text-red-400 text-lg font-mono">
               {formatTime(recordingTime)} / 1:00
+            </p>
+          )}
+          {!transcriptionAvailable && (
+            <p className="text-yellow-400 text-sm mt-2">
+              ⚠️ Voice transcription not available in this browser
             </p>
           )}
         </div>

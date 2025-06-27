@@ -1,4 +1,5 @@
 import type { ClaudeResponse, JokeMetrics } from '../types';
+import { analyzeJokeWithClaude } from './claudeService';
 
 // Convert blob to base64 for storage
 export const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -181,13 +182,26 @@ export function analyzeJoke(transcript: string, duration: number): ClaudeRespons
   };
 }
 
-// Simulate API delay
+// Get AI response with fallback to mock
 export async function getMockClaudeResponse(
   transcript: string, 
   duration: number
 ): Promise<ClaudeResponse> {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-  
-  return analyzeJoke(transcript, duration);
+  try {
+    // Check if API key is configured
+    if (!import.meta.env.VITE_ANTHROPIC_API_KEY || import.meta.env.VITE_ANTHROPIC_API_KEY === 'your_anthropic_api_key_here') {
+      console.warn('Claude API key not configured, using mock response');
+      // Simulate network delay for consistency
+      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      return analyzeJoke(transcript, duration);
+    }
+
+    // Try to get Claude AI response
+    const aiResponse = await analyzeJokeWithClaude(transcript, duration);
+    return aiResponse;
+  } catch (error) {
+    console.error('Failed to get Claude AI response, falling back to mock:', error);
+    // Fallback to mock response
+    return analyzeJoke(transcript, duration);
+  }
 }
