@@ -46,7 +46,7 @@ export default function AvatarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F172A] to-[#1E293B] text-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen text-white flex flex-col items-center justify-center p-4">
       {/* Logo */}
       <div className="mb-8">
         <img src={logo} alt="Got Jokes?" className="h-24 w-auto" />

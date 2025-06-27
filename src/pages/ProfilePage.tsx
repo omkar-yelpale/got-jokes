@@ -82,7 +82,7 @@ export default function ProfilePage() {
   const totalRoses = publishedJokes.reduce((sum, joke) => sum + joke.reactions.roses, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
+    <div className="min-h-screen">
       <div className="max-w-md mx-auto pb-20">
         {/* Header */}
         <div className="flex justify-center items-center py-6 px-4">
