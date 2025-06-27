@@ -70,7 +70,6 @@ src/
 - **Background**: Navy blue gradient (#0F172A to #1E293B)
 - **Typography**: System fonts with fallbacks
 - **Mobile Breakpoints**: 320px base, responsive up to desktop
-- **Component Library**: Mantine for pre-built components (buttons, forms, modals, etc.)
 - **Custom Styling**: Tailwind CSS for layout and custom components
 
 ## Implementation Priorities
@@ -84,7 +83,6 @@ Based on the PRD's 4-hour implementation plan:
 ## Core Libraries (Already Installed)
 
 ### UI & Styling
-- **Mantine**: Complete UI component library with forms, notifications, dates
 - **Tailwind CSS**: Utility-first CSS framework for custom styling
 - **React Router DOM**: Client-side routing
 
@@ -144,7 +142,6 @@ interface AppState {
 The project has been initialized with:
 - Vite + React + TypeScript boilerplate
 - React Router DOM for routing
-- Mantine UI component library
 - Tailwind CSS for styling
 - PostCSS configuration
 

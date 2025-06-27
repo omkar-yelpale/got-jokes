@@ -12,6 +12,9 @@ export default {
         'navy-dark': '#0F172A',
         'navy-light': '#1E293B',
       },
+      borderWidth: {
+        '3': '3px',
+      },
     },
   },
   plugins: [],
